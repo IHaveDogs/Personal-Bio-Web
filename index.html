@@ -797,11 +797,27 @@ html&gt;body{padding:0}&lt;/style&gt;
   #biography-world-map svg { display: block; width: 100%; height: auto; overflow: visible; }
   #biography-world-map .globe { fill: var(--muted); stroke: var(--border); stroke-width: 1.5; }
   #biography-world-map .grid-line { fill: none; stroke: var(--background); stroke-width: 1; opacity: .65; }
-  #biography-world-map .world-country { fill: color-mix(in srgb, var(--foreground) 18%, var(--muted)); stroke: var(--background); stroke-width: .55; vector-effect: non-scaling-stroke; }
+  #biography-world-map .world-country { stroke: var(--background); stroke-width: .55; vector-effect: non-scaling-stroke; }
+  #biography-world-map .world-country.tone-1 { fill: color-mix(in srgb, var(--viz-series-1) 30%, var(--muted)); }
+  #biography-world-map .world-country.tone-2 { fill: color-mix(in srgb, var(--viz-series-2) 32%, var(--muted)); }
+  #biography-world-map .world-country.tone-3 { fill: color-mix(in srgb, var(--viz-series-3) 32%, var(--muted)); }
+  #biography-world-map .world-country.tone-4 { fill: color-mix(in srgb, var(--viz-series-4) 30%, var(--muted)); }
+  #biography-world-map .world-country.tone-5 { fill: color-mix(in srgb, var(--viz-series-5) 32%, var(--muted)); }
+  #biography-world-map .world-country.tone-6 { fill: color-mix(in srgb, var(--viz-series-6) 30%, var(--muted)); }
   #biography-world-map .us-state { fill: var(--muted); stroke: var(--background); stroke-width: .8; vector-effect: non-scaling-stroke; }
   #biography-world-map .us-state.is-highlighted { fill: color-mix(in srgb, var(--viz-series-1) 62%, var(--muted)); stroke: var(--foreground); stroke-width: 1.2; cursor: pointer; }
+  #biography-world-map .us-state.is-highlighted.tone-2 { fill: color-mix(in srgb, var(--viz-series-2) 62%, var(--muted)); }
+  #biography-world-map .us-state.is-highlighted.tone-3 { fill: color-mix(in srgb, var(--viz-series-3) 62%, var(--muted)); }
+  #biography-world-map .us-state.is-highlighted.tone-4 { fill: color-mix(in srgb, var(--viz-series-4) 62%, var(--muted)); }
+  #biography-world-map .us-state.is-highlighted.tone-5 { fill: color-mix(in srgb, var(--viz-series-5) 62%, var(--muted)); }
+  #biography-world-map .us-state.is-highlighted.tone-6 { fill: color-mix(in srgb, var(--viz-series-6) 62%, var(--muted)); }
   #biography-world-map .map-link:focus .us-state { stroke: var(--ring); stroke-width: 3; }
   #biography-world-map .place-dot { fill: var(--viz-series-1); stroke: var(--background); stroke-width: 2; vector-effect: non-scaling-stroke; cursor: pointer; }
+  #biography-world-map .place-dot.tone-2 { fill: var(--viz-series-2); }
+  #biography-world-map .place-dot.tone-3 { fill: var(--viz-series-3); }
+  #biography-world-map .place-dot.tone-4 { fill: var(--viz-series-4); }
+  #biography-world-map .place-dot.tone-5 { fill: var(--viz-series-5); }
+  #biography-world-map .place-dot.tone-6 { fill: var(--viz-series-6); }
   #biography-world-map .place-ring { fill: none; stroke: var(--foreground); stroke-width: 1; vector-effect: non-scaling-stroke; pointer-events: none; }
   #biography-world-map .map-link:focus .place-dot { stroke: var(--ring); stroke-width: 3; }
   #biography-world-map .place-label { fill: var(--foreground); font-size: 12px; font-weight: 500; pointer-events: none; }
@@ -876,7 +892,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     { short: &quot;Xcaret&quot;, name: &quot;Xcaret, Quintana Roo, Mexico&quot;, caption: &quot;Great park (That is huge) with waterslides and a zipline that goes through the forest&quot;, description: &quot;Xcaret is the adventure finale: a huge park of water, underground rivers, forest paths, waterslides, and zipline thrills.&quot;, symbol: &quot;🌴&quot;, object: &quot;Ride into the jungle&quot;, lat: 20.5809, lon: -87.1197, zoom: 15, type: &quot;place&quot; }
   ];
 
-  const mapUrl = d =&gt; `https://www.google.com/maps/@?api=1&amp;map_action=map&amp;center=${d.lat},${d.lon}&amp;zoom=${d.zoom}&amp;basemap=satellite`;
+  const mapUrl = d =&gt; `https://www.google.com/maps/@${d.lat},${d.lon},${d.zoom}z/data=!3m1!1e3`;
   const label = d =&gt; `${d.name} — ${d.caption}`;
   let bookIndex = -1;
   const renderBookPage = () =&gt; {
@@ -971,8 +987,8 @@ html&gt;body{padding:0}&lt;/style&gt;
   };
   const worldTopology = JSON.parse(document.getElementById(&quot;world-country-topology&quot;).textContent);
   const worldArcs = decodeArcs(worldTopology);
-  worldTopology.objects.countries.geometries.forEach(geometry =&gt; {
-    addSvg(&quot;path&quot;, { class: &quot;world-country&quot;, d: ringsFor(geometry, worldArcs).map(pathForRing).join(&quot;&quot;) }, mapLayer);
+  worldTopology.objects.countries.geometries.forEach((geometry, index) =&gt; {
+    addSvg(&quot;path&quot;, { class: `world-country tone-${index % 6 + 1}`, d: ringsFor(geometry, worldArcs).map(pathForRing).join(&quot;&quot;) }, mapLayer);
   });
   const topology = JSON.parse(document.getElementById(&quot;us-state-topology&quot;).textContent);
   const decodedArcs = decodeArcs(topology);
@@ -985,7 +1001,8 @@ html&gt;body{padding:0}&lt;/style&gt;
     const parent = destination
       ? addSvg(&quot;a&quot;, { class: &quot;map-link&quot;, href: mapUrl(destination), target: &quot;_blank&quot;, &quot;aria-label&quot;: `${label(destination)}. Open satellite view.` }, mapLayer)
       : mapLayer;
-    addSvg(&quot;path&quot;, { class: `us-state${destination ? &quot; is-highlighted&quot; : &quot;&quot;}`, d: rings.map(pathForRing).join(&quot;&quot;) }, parent);
+    const destinationIndex = destination ? destinations.indexOf(destination) : -1;
+    addSvg(&quot;path&quot;, { class: `us-state${destination ? ` is-highlighted tone-${destinationIndex % 6 + 1}` : &quot;&quot;}`, d: rings.map(pathForRing).join(&quot;&quot;) }, parent);
     if (destination) {
       parent.addEventListener(&quot;pointerenter&quot;, () =&gt; showTooltip(parent, destination));
       parent.addEventListener(&quot;focus&quot;, () =&gt; showTooltip(parent, destination));
@@ -1009,7 +1026,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     const mapLink = addSvg(&quot;a&quot;, { class: &quot;map-link&quot;, href: mapUrl(d), target: &quot;_blank&quot;, &quot;aria-label&quot;: `${label(d)}. Open satellite view.` }, mapLayer);
     addSvg(&quot;circle&quot;, { class: &quot;touch-target&quot;, cx: x, cy: y, r: 16 }, mapLink);
     addSvg(&quot;circle&quot;, { class: &quot;place-ring&quot;, cx: x, cy: y, r: 8 }, mapLink);
-    addSvg(&quot;circle&quot;, { class: &quot;place-dot&quot;, cx: x, cy: y, r: 5 }, mapLink);
+    addSvg(&quot;circle&quot;, { class: `place-dot tone-${index % 6 + 1}`, cx: x, cy: y, r: 5 }, mapLink);
     const placeLabel = addSvg(&quot;text&quot;, { class: &quot;place-label&quot;, x: x + 10, y: y + (index % 2 ? 15 : -9) }, mapLink);
     placeLabel.textContent = d.short;
     mapLink.addEventListener(&quot;pointerenter&quot;, () =&gt; showTooltip(mapLink, d));
